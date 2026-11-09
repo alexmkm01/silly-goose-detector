@@ -1,0 +1,259 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Emma's Silly Goose Detector</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;padding:20px;
+ font-family:Arial,sans-serif;
+ background:linear-gradient(135deg,#fff1a8,#ffb8d2);
+ color:#302344;text-align:center;
+ min-height:100vh
+}
+main{max-width:520px;margin:auto}
+h1{font-size:32px;color:#d82368}
+h2{font-size:23px}
+.goose{font-size:100px;animation:wobble 1s infinite alternate}
+@keyframes wobble{
+ from{transform:rotate(-12deg)}
+ to{transform:rotate(12deg)}
+}
+.card{
+ background:white;border-radius:22px;
+ padding:22px;margin:18px 0;
+ box-shadow:0 6px 20px #0002
+}
+button{
+ display:block;width:100%;padding:18px;
+ margin:12px 0;border:0;border-radius:15px;
+ font-size:17px;font-weight:bold;
+ background:#ffdb40;color:#302344;
+ cursor:pointer;touch-action:manipulation
+}
+button:active{transform:scale(.97)}
+.red{background:#ff3864;color:white}
+.purple{background:#7755d9;color:white}
+.green{background:#42d9a1}
+#result{font-size:21px;font-weight:bold;min-height:70px}
+#certificate{display:none;border:5px dashed #d82368}
+.warning{
+ background:#ff3864;color:white;
+ padding:12px;border-radius:12px;
+ font-weight:bold
+}
+.flash{animation:flash .18s 8}
+@keyframes flash{
+ 0%,100%{background:#fff1a8}
+ 50%{background:#ff3864}
+}
+#confetti{
+ position:fixed;inset:0;
+ pointer-events:none;overflow:hidden
+}
+.piece{
+ position:absolute;top:-30px;
+ animation:fall 3s linear forwards
+}
+@keyframes fall{
+ to{transform:translateY(110vh) rotate(900deg)}
+}
+small{color:#665779}
+@media(prefers-reduced-motion:reduce){
+ .goose,.flash,.piece{animation:none!important}
+}
+</style>
+</head>
+<body>
+<main>
+<div class="warning">🚨 SILLY GOOSE ALERT 🚨</div>
+<div class="goose">🪿</div>
+<h1>EMMA'S SILLY GOOSE DETECTOR™</h1>
+<p>Official Department of Goose Behaviour</p>
+
+<div class="card">
+<h2>EMMA, YOU ARE A SILLY GOOSE.</h2>
+<p>Our advanced technology has detected
+dangerously high levels of silliness.</p>
+<h2>🪿 100% SILLY GOOSE 🪿</h2>
+</div>
+
+<div class="card">
+<h2>🔍 Silly Goose Scanner</h2>
+<button onclick="scan()">SCAN EMMA</button>
+<p id="scanResult">Awaiting goose analysis...</p>
+</div>
+
+<div class="card">
+<h2>🔊 Emergency Goose Alarm</h2>
+<p>WARNING: This honk is extremely annoying.</p>
+<button class="red" onclick="megaHonk()">
+🚨 EXTREMELY LOUD HONK 🚨
+</button>
+<small>Check your volume before pressing!</small>
+</div>
+
+<div class="card">
+<h2>⚖️ Appeal Your Goose Status</h2>
+<p>Emma may dispute these allegations.</p>
+<button class="purple" onclick="appeal()">
+I AM NOT A SILLY GOOSE
+</button>
+<p id="appealResult"></p>
+</div>
+
+<div class="card">
+<h2>🚫 Forbidden Goose Button</h2>
+<p>Under absolutely no circumstances press this.</p>
+<button class="red" onclick="forbidden()">
+DO NOT PRESS
+</button>
+</div>
+
+<div class="card">
+<h2>📜 Official Goose Certification</h2>
+<button class="green" onclick="certify()">
+ISSUE EMMA'S CERTIFICATE
+</button>
+<div id="certificate" class="card">
+<h2>🏆 CERTIFICATE OF ABSOLUTE GOOSE 🏆</h2>
+<p>This certifies that</p>
+<h1>EMMA</h1>
+<p>is officially, undeniably and permanently</p>
+<h2>A VERY SILLY GOOSE</h2>
+<p>Appeals: Rejected</p>
+<p>Signed: The Supreme Goose 🪿</p>
+</div>
+</div>
+
+<div class="card">
+<p id="result">Goose monitoring active.</p>
+</div>
+
+<small>
+This is a joke. No actual scanning or monitoring.
+</small>
+</main>
+<div id="confetti"></div>
+
+<script>
+let audioContext;
+let appeals=0;
+
+function audio(){
+ const AC=window.AudioContext||window.webkitAudioContext;
+ if(!AC)return null;
+ if(!audioContext)audioContext=new AC();
+ audioContext.resume();
+ return audioContext;
+}
+
+function honk(){
+ const ctx=audio();
+ if(!ctx)return;
+ const now=ctx.currentTime;
+ const master=ctx.createGain();
+ master.gain.value=.45;
+ master.connect(ctx.destination);
+
+ [0,0.12,0.25].forEach((delay,i)=>{
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+  osc.type=i===1?"sawtooth":"square";
+  const start=now+delay;
+  osc.frequency.setValueAtTime(380,start);
+  osc.frequency.exponentialRampToValueAtTime(165,start+.35);
+  gain.gain.setValueAtTime(.001,start);
+  gain.gain.exponentialRampToValueAtTime(.16,start+.025);
+  gain.gain.exponentialRampToValueAtTime(.001,start+.43);
+  osc.connect(gain);
+  gain.connect(master);
+  osc.start(start);
+  osc.stop(start+.45);
+ });
+}
+
+function flash(){
+ if(window.matchMedia(
+  "(prefers-reduced-motion: reduce)"
+ ).matches)return;
+ document.body.classList.remove("flash");
+ void document.body.offsetWidth;
+ document.body.classList.add("flash");
+ setTimeout(()=>document.body.classList.remove("flash"),1500);
+}
+
+function message(text){
+ document.getElementById("result").textContent=text;
+}
+
+function megaHonk(){
+ honk();
+ flash();
+ message("🚨 EMMA HAS ACTIVATED MAXIMUM GOOSE MODE 🚨");
+ confetti();
+}
+
+function scan(){
+ const values=[97,99,100,104,999];
+ const value=values[Math.floor(Math.random()*values.length)];
+ document.getElementById("scanResult").textContent=
+ "SCAN COMPLETE: Emma is "+value+"% SILLY GOOSE.";
+ message("Diagnosis confirmed. There is no cure. HONK.");
+ honk();
+}
+
+function appeal(){
+ appeals++;
+ const replies=[
+ "APPEAL REJECTED. Only a silly goose would appeal.",
+ "REJECTED. Three geese reviewed your case. All honked.",
+ "REJECTED AGAIN. Emma is displaying advanced goose behaviour.",
+ "FINAL VERDICT: Emma is the silliest goose in the land."
+ ];
+ document.getElementById("appealResult").textContent=
+ replies[Math.min(appeals-1,replies.length-1)];
+ message("Total failed appeals: "+appeals);
+ honk();
+}
+
+function forbidden(){
+ flash();
+ honk();
+ confetti();
+ message("🚨 EMMA PRESSED THE FORBIDDEN BUTTON! EXTREME SILLINESS DETECTED!");
+ alert("YOU ABSOLUTE SILLY GOOSE, EMMA! 🪿");
+}
+
+function certify(){
+ document.getElementById("certificate").style.display="block";
+ message("Emma has been legally declared a goose. (Not really.)");
+ confetti();
+ honk();
+ document.getElementById("certificate")
+  .scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+function confetti(){
+ if(window.matchMedia(
+  "(prefers-reduced-motion: reduce)"
+ ).matches)return;
+ const container=document.getElementById("confetti");
+ const colours=["#ff3864","#ffdb40","#7755d9","#42d9a1"];
+ for(let i=0;i<45;i++){
+  const p=document.createElement("span");
+  p.className="piece";
+  p.textContent=["🪿","✨","🎉"][Math.floor(Math.random()*3)];
+  p.style.left=Math.random()*100+"%";
+  p.style.fontSize=(12+Math.random()*18)+"px";
+  p.style.animationDelay=Math.random()*.5+"s";
+  container.appendChild(p);
+  setTimeout(()=>p.remove(),4000);
+ }
+}
+</script>
+</body>
+</html>
